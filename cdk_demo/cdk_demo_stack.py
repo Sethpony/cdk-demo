@@ -1,19 +1,31 @@
-from aws_cdk import (
-    # Duration,
-    Stack,
-    # aws_sqs as sqs,
-)
 from constructs import Construct
+from aws_cdk import (
+    Stack,
+    aws_lambda as _lambda,  # using _lambda because lambda is a built-in identifier in Python
+    aws_apigateway as apigw
+)
 
+
+# This is a class that represents the CFN stack
 class CdkDemoStack(Stack):
 
     def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
-        # The code that defines your stack goes here
+        # Defines an AWS Lambda Resource
+        my_lambda = _lambda.Function(
+            self, 'HelloHandler',
+            runtime=_lambda.Runtime.PYTHON_3_7,
+            code=_lambda.Code.from_asset('lambda'),
+            # where the code resides - alternative path definition code=lambda_.Code.from_asset(path.join(__dirname, "my-lambda-handler")),
 
-        # example resource
-        # queue = sqs.Queue(
-        #     self, "CdkDemoQueue",
-        #     visibility_timeout=Duration.seconds(300),
-        # )
+            handler='hello.handler',
+            # The name of the handler function is hello.handler, 'hello' is the name of the file and 'handler' is the function name
+        )
+
+        apigw.LambdaRestApi(
+            self, 'Endpoint',
+            handler=my_lambda
+            #create an endpoint and run the lambda function
+        )
+
